@@ -52,7 +52,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The API will run on `http://127.0.0.1:8082`.
+The API will run on `http://127.0.0.1:8082` locally and is deployed at `https://smart-grocery-tracking-system.onrender.com`.
 
 ### Google Sheets Backup Setup
 
@@ -90,7 +90,7 @@ The frontend will run on `http://127.0.0.1:5173`.
 Set `frontend/.env` to point to your backend:
 
 ```env
-VITE_API_URL=http://127.0.0.1:8082
+VITE_API_URL=https://smart-grocery-tracking-system.onrender.com
 ```
 
 ## API Endpoints
