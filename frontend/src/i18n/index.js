@@ -4,7 +4,8 @@ import { initReactI18next } from "react-i18next";
 import en from "./en.json";
 import te from "./te.json";
 
-const savedLanguage = localStorage.getItem("smart-grocery-language") || "en";
+const savedLanguage =
+  typeof window !== "undefined" ? window.localStorage.getItem("smart-grocery-language") || "en" : "en";
 
 i18n.use(initReactI18next).init({
   resources: {

@@ -11,12 +11,25 @@ function DashboardPage() {
   const { t } = useTranslation();
   const [period, setPeriod] = useState("today");
   const [dashboard, setDashboard] = useState(null);
+  const [error, setError] = useState("");
 
   const fetchDashboard = async (selectedPeriod) => {
-    const response = await api.get("/dashboard", {
-      params: { period: selectedPeriod }
-    });
-    setDashboard(response.data);
+    try {
+      setError("");
+      const response = await api.get("/dashboard", {
+        params: { period: selectedPeriod }
+      });
+      setDashboard(response.data || {});
+    } catch (err) {
+      console.error("Failed to load dashboard", err);
+      setDashboard({
+        total_purchased_kg: 0,
+        top_seller: null,
+        village_totals: [],
+        chart_data: []
+      });
+      setError("Unable to load dashboard. Please check the backend connection.");
+    }
   };
 
   useEffect(() => {
@@ -67,6 +80,7 @@ function DashboardPage() {
         <p>{t("actions.loading")}</p>
       ) : (
         <>
+          {error ? <p className="empty-state">{error}</p> : null}
           <div className="stats-grid">
             <article className="stat-card">
               <span>{t("dashboard.totalPurchasedToday")}</span>
@@ -86,11 +100,11 @@ function DashboardPage() {
           <div className="split-layout">
             <section className="card">
               <h2>{t("dashboard.villageTotals")}</h2>
-              {dashboard.village_totals.length === 0 ? (
+              {(dashboard.village_totals || []).length === 0 ? (
                 <p className="empty-state">{t("messages.dashboardEmpty")}</p>
               ) : (
                 <div className="village-list">
-                  {dashboard.village_totals.map((item) => (
+                  {(dashboard.village_totals || []).map((item) => (
                     <div key={item.village} className="village-item">
                       <span>{item.village}</span>
                       <strong>{Number(item.total_kg).toFixed(2)} kg</strong>
@@ -102,7 +116,7 @@ function DashboardPage() {
 
             <section className="card chart-card">
               <h2>{t("dashboard.chartTitle")}</h2>
-              {dashboard.chart_data.length === 0 ? (
+              {(dashboard.chart_data || []).length === 0 ? (
                 <p className="empty-state">{t("messages.dashboardEmpty")}</p>
               ) : (
                 <Bar

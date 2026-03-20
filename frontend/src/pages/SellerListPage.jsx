@@ -12,14 +12,23 @@ function SellerListPage() {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const fetchSellers = async (searchTerm = "") => {
-    setLoading(true);
-    const response = await api.get("/sellers", {
-      params: searchTerm ? { search: searchTerm } : {}
-    });
-    setSellers(response.data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      setError("");
+      const response = await api.get("/sellers", {
+        params: searchTerm ? { search: searchTerm } : {}
+      });
+      setSellers(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error("Failed to load sellers", err);
+      setSellers([]);
+      setError("Unable to load sellers. Please check the backend connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -27,9 +36,15 @@ function SellerListPage() {
   }, []);
 
   const handleSellerAdded = async (payload) => {
-    await api.post("/add-seller", payload);
-    setMessage(t("messages.sellerSaved"));
-    fetchSellers(search);
+    try {
+      setError("");
+      await api.post("/add-seller", payload);
+      setMessage(t("messages.sellerSaved"));
+      fetchSellers(search);
+    } catch (err) {
+      console.error("Failed to add seller", err);
+      setError("Unable to save seller. Please try again.");
+    }
   };
 
   const handleSearch = async (event) => {
@@ -46,6 +61,7 @@ function SellerListPage() {
       </section>
 
       {message ? <p className="success-message">{message}</p> : null}
+      {error ? <p className="empty-state">{error}</p> : null}
 
       <div className="split-layout">
         <AddSellerForm onSellerAdded={handleSellerAdded} />

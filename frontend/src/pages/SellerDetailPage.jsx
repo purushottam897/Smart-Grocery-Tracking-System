@@ -14,17 +14,32 @@ function SellerDetailPage() {
   const [lastEntry, setLastEntry] = useState(null);
   const [dailyTotal, setDailyTotal] = useState(0);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const fetchSellerData = async () => {
-    const [sellerResponse, entriesResponse] = await Promise.all([
-      api.get(`/sellers/${sellerId}`),
-      api.get(`/entries/${sellerId}`)
-    ]);
+    try {
+      setLoading(true);
+      setError("");
+      const [sellerResponse, entriesResponse] = await Promise.all([
+        api.get(`/sellers/${sellerId}`),
+        api.get(`/entries/${sellerId}`)
+      ]);
 
-    setSeller(sellerResponse.data);
-    setEntries(entriesResponse.data.entries || []);
-    setLastEntry(entriesResponse.data.last_entry || null);
-    setDailyTotal(entriesResponse.data.today_total_kg || 0);
+      setSeller(sellerResponse.data || null);
+      setEntries(Array.isArray(entriesResponse.data?.entries) ? entriesResponse.data.entries : []);
+      setLastEntry(entriesResponse.data?.last_entry || null);
+      setDailyTotal(entriesResponse.data?.today_total_kg || 0);
+    } catch (err) {
+      console.error("Failed to load seller details", err);
+      setSeller(null);
+      setEntries([]);
+      setLastEntry(null);
+      setDailyTotal(0);
+      setError("Unable to load seller details. Please check the backend connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -32,30 +47,50 @@ function SellerDetailPage() {
   }, [sellerId]);
 
   const handleSubmitEntry = async (payload) => {
-    await api.post("/add-entry", {
-      seller_id: Number(sellerId),
-      bags: Number(payload.bags),
-      weight_per_bag: Number(payload.weight_per_bag)
-    });
-    setMessage(t("messages.entrySaved"));
-    fetchSellerData();
+    try {
+      setError("");
+      await api.post("/add-entry", {
+        seller_id: Number(sellerId),
+        bags: Number(payload.bags),
+        weight_per_bag: Number(payload.weight_per_bag)
+      });
+      setMessage(t("messages.entrySaved"));
+      fetchSellerData();
+    } catch (err) {
+      console.error("Failed to save entry", err);
+      setError("Unable to save entry. Please try again.");
+    }
   };
 
   const handleRepeatLastEntry = async () => {
     if (!lastEntry) {
       return;
     }
-    await api.post("/add-entry", {
-      seller_id: Number(sellerId),
-      bags: Number(lastEntry.bags),
-      weight_per_bag: Number(lastEntry.weight_per_bag)
-    });
-    setMessage(t("messages.entryRepeated"));
-    fetchSellerData();
+    try {
+      setError("");
+      await api.post("/add-entry", {
+        seller_id: Number(sellerId),
+        bags: Number(lastEntry.bags),
+        weight_per_bag: Number(lastEntry.weight_per_bag)
+      });
+      setMessage(t("messages.entryRepeated"));
+      fetchSellerData();
+    } catch (err) {
+      console.error("Failed to repeat entry", err);
+      setError("Unable to repeat the last entry. Please try again.");
+    }
   };
 
-  if (!seller) {
+  if (loading) {
     return <p>{t("actions.loading")}</p>;
+  }
+
+  if (error) {
+    return <p className="empty-state">{error}</p>;
+  }
+
+  if (!seller) {
+    return <p className="empty-state">Seller not found.</p>;
   }
 
   return (
@@ -65,6 +100,7 @@ function SellerDetailPage() {
       </Link>
 
       {message ? <p className="success-message">{message}</p> : null}
+      {error ? <p className="empty-state">{error}</p> : null}
 
       <section className="card seller-detail-card">
         <div>

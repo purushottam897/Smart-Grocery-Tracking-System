@@ -5,7 +5,9 @@ function LanguageToggle() {
 
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem("smart-grocery-language", lang);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("smart-grocery-language", lang);
+    }
   };
 
   return (
