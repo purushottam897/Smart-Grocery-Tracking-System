@@ -4,34 +4,50 @@ import mysql.connector
 from mysql.connector import Error
 
 
-def get_env_value(*keys, default=None, allow_empty=False):
+def _get_env(*keys, default=None):
     for key in keys:
-        if key in os.environ:
-            value = os.environ.get(key)
-            if value == "" and not allow_empty:
-                continue
+        value = os.getenv(key)
+        if value not in (None, ""):
             return value
+
     return default
 
 
+def _is_truthy(value):
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def get_db_config():
-    host = get_env_value("DB_HOST", "MYSQL_HOST", default="localhost")
-    user = get_env_value("DB_USER", "MYSQL_USER", default="root")
-    password = get_env_value("DB_PASS", "MYSQL_PASSWORD", default="password", allow_empty=True)
-    database = get_env_value("DB_NAME", "MYSQL_DATABASE", default="grocery_db")
-    port = get_env_value("DB_PORT", "MYSQL_PORT", default="3306")
+    port = _get_env("DB_PORT", "MYSQL_PORT", "MYSQLPORT", default="3306")
 
     return {
-        "host": host,
-        "user": user,
-        "password": password,
-        "database": database,
+        "host": _get_env("DB_HOST", "MYSQL_HOST", "MYSQLHOST"),
         "port": int(port),
+        "user": _get_env("DB_USER", "MYSQL_USER", "MYSQLUSER"),
+        "password": _get_env("DB_PASS", "MYSQL_PASSWORD", "MYSQLPASSWORD", default=""),
+        "database": _get_env("DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE"),
+    }
+
+
+def validate_db_config(config):
+    missing = [key for key in ("host", "user", "database") if not config.get(key)]
+    if missing:
+        raise RuntimeError(
+            "Missing required database environment variables: "
+            + ", ".join(f"DB_{key.upper()}" for key in missing)
+        )
+
+    return {
+        "host": config["host"],
+        "port": int(config["port"]),
+        "user": config["user"],
+        "password": config["password"],
+        "database": config["database"],
     }
 
 
 def get_db_debug_summary():
-    config = get_db_config()
+    config = validate_db_config(get_db_config())
     password = config.get("password", "")
     return {
         "host": config["host"],
@@ -44,17 +60,17 @@ def get_db_debug_summary():
 
 
 def get_connection():
-    return mysql.connector.connect(**get_db_config())
+    return mysql.connector.connect(**validate_db_config(get_db_config()))
 
 
 def get_server_connection():
-    config = get_db_config().copy()
+    config = validate_db_config(get_db_config()).copy()
     config.pop("database", None)
     return mysql.connector.connect(**config)
 
 
 def ensure_database_exists():
-    config = get_db_config()
+    config = validate_db_config(get_db_config())
     database_name = config["database"]
     connection = None
     cursor = None
@@ -83,6 +99,14 @@ def ensure_database_exists():
             cursor.close()
         if connection and connection.is_connected():
             connection.close()
+
+
+def should_attempt_database_create(config):
+    if _is_truthy(os.getenv("DB_AUTO_CREATE", "false")):
+        return True
+
+    host = (config.get("host") or "").strip().lower()
+    return host in {"localhost", "127.0.0.1"}
 
 
 def create_tables(connection):
@@ -122,14 +146,26 @@ def create_tables(connection):
 
 
 def init_db():
-    config = get_db_config()
-    ensure_database_exists()
+    config = validate_db_config(get_db_config())
     connection = None
 
     try:
         connection = get_connection()
         create_tables(connection)
     except Error as exc:
+        if exc.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR and should_attempt_database_create(config):
+            print(
+                "Database does not exist yet; attempting creation with current credentials:",
+                f"host={config['host']}",
+                f"port={config['port']}",
+                f"user={config['user']}",
+                f"database={config['database']}",
+            )
+            ensure_database_exists()
+            connection = get_connection()
+            create_tables(connection)
+            return
+
         raise RuntimeError(
             "MySQL connection failed during database initialization. "
             f"host={config['host']} port={config['port']} user={config['user']} "

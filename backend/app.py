@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from flask import Flask
 from flask_cors import CORS
@@ -10,13 +9,7 @@ from routes.dashboard_routes import dashboard_bp
 from routes.entry_routes import entry_bp
 from routes.seller_routes import seller_bp
 
-BASE_DIR = Path(__file__).resolve().parent
-ENV_PATH = BASE_DIR / ".env"
-ENV_EXAMPLE_PATH = BASE_DIR / ".env.example"
-
-ACTIVE_ENV_PATH = ENV_PATH if ENV_PATH.exists() else ENV_EXAMPLE_PATH
-
-load_dotenv(ACTIVE_ENV_PATH)
+load_dotenv()
 
 
 def get_cors_origins():
@@ -40,7 +33,6 @@ def create_app():
             f"user={db_summary['user']}",
             f"database={db_summary['database']}",
             f"password_set={db_summary['password_set']}",
-            f"env_file={ACTIVE_ENV_PATH}",
         )
         init_db()
     except Exception as exc:
