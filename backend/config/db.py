@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 
 import mysql.connector
 from mysql.connector import Error
@@ -17,15 +18,43 @@ def _is_truthy(value):
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _get_database_url():
+    return _get_env("DATABASE_URL", "MYSQL_PUBLIC_URL", "MYSQL_URL")
+
+
+def _parse_database_url():
+    database_url = _get_database_url()
+    if not database_url:
+        return {}
+
+    parsed = urlparse(database_url)
+    if parsed.scheme not in {"mysql", "mysql+pymysql"}:
+        return {}
+
+    return {
+        "host": parsed.hostname,
+        "port": parsed.port or 3306,
+        "user": parsed.username,
+        "password": parsed.password or "",
+        "database": parsed.path.lstrip("/") or None,
+    }
+
+
 def get_db_config():
+    url_config = _parse_database_url()
     port = _get_env("DB_PORT", "MYSQL_PORT", "MYSQLPORT", default="3306")
 
     return {
-        "host": _get_env("DB_HOST", "MYSQL_HOST", "MYSQLHOST"),
-        "port": int(port),
-        "user": _get_env("DB_USER", "MYSQL_USER", "MYSQLUSER"),
-        "password": _get_env("DB_PASS", "MYSQL_PASSWORD", "MYSQLPASSWORD", default=""),
-        "database": _get_env("DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE"),
+        "host": _get_env("DB_HOST", "MYSQL_HOST", "MYSQLHOST", default=url_config.get("host")),
+        "port": int(_get_env("DB_PORT", "MYSQL_PORT", "MYSQLPORT", default=str(url_config.get("port", port)))),
+        "user": _get_env("DB_USER", "MYSQL_USER", "MYSQLUSER", default=url_config.get("user")),
+        "password": _get_env(
+            "DB_PASS",
+            "MYSQL_PASSWORD",
+            "MYSQLPASSWORD",
+            default=url_config.get("password", ""),
+        ),
+        "database": _get_env("DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE", default=url_config.get("database")),
     }
 
 
