@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import VoiceInputButton from "./VoiceInputButton";
 
+const productOptions = ["ధాన్యం", "మొక్కజొన్న"];
+
 const initialState = {
   person_name: "",
   product: "",
@@ -13,6 +15,7 @@ function AddSellerForm({ onSellerAdded }) {
   const { t } = useTranslation();
   const [formData, setFormData] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
+  const [productMenuOpen, setProductMenuOpen] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -28,6 +31,7 @@ function AddSellerForm({ onSellerAdded }) {
     setSubmitting(true);
     await onSellerAdded(formData);
     setFormData(initialState);
+    setProductMenuOpen(false);
     setSubmitting(false);
   };
 
@@ -51,15 +55,35 @@ function AddSellerForm({ onSellerAdded }) {
 
       <label>
         <span>{t("labels.product")}</span>
-        <div className="voice-input-row">
-          <input
-            required
-            name="product"
-            value={formData.product}
-            onChange={handleChange}
-            placeholder={t("placeholders.product")}
-          />
-          <VoiceInputButton onTranscript={handleVoiceFill("product")} />
+        <div className="product-picker">
+          <button
+            type="button"
+            className={`product-picker-button${productMenuOpen ? " open" : ""}`}
+            onClick={() => setProductMenuOpen((current) => !current)}
+          >
+            <span>{formData.product || t("placeholders.product")}</span>
+            <span>{productMenuOpen ? "▲" : "▼"}</span>
+          </button>
+
+          {productMenuOpen ? (
+            <div className="product-picker-menu" role="listbox" aria-label={t("labels.product")}>
+              {productOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`product-option${formData.product === option ? " active" : ""}`}
+                  onClick={() => {
+                    setFormData((current) => ({ ...current, product: option }));
+                    setProductMenuOpen(false);
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <input required type="hidden" name="product" value={formData.product} onChange={handleChange} />
         </div>
       </label>
 

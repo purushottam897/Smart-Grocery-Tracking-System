@@ -34,6 +34,10 @@ input {
   font: inherit;
 }
 
+select {
+  font: inherit;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -179,6 +183,59 @@ input {
   border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface-strong);
+}
+
+.product-picker {
+  position: relative;
+}
+
+.product-picker-button,
+.product-option {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  color: #173127;
+  cursor: pointer;
+}
+
+.product-picker-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 16px;
+}
+
+.product-picker-button.open {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.product-picker-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+
+.product-option {
+  padding: 12px 14px;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.product-option.active,
+.product-option:hover {
+  background: #edf5ef;
+  color: var(--primary-dark);
 }
 
 .primary-button,
