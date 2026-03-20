@@ -12,17 +12,31 @@ from routes.seller_routes import seller_bp
 load_dotenv()
 
 
+def normalize_origin(origin):
+    return origin.strip().rstrip("/")
+
+
 def get_cors_origins():
     origins = os.getenv("CORS_ORIGINS", "*").strip()
     if origins == "*":
         return "*"
-    return [origin.strip() for origin in origins.split(",") if origin.strip()]
+    return [normalize_origin(origin) for origin in origins.split(",") if origin.strip()]
 
 
 def create_app():
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
-    CORS(app, resources={r"/*": {"origins": get_cors_origins()}})
+    cors_origins = get_cors_origins()
+    CORS(
+        app,
+        resources={
+            r"/*": {
+                "origins": cors_origins,
+                "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
 
     try:
         db_summary = get_db_debug_summary()
@@ -33,6 +47,7 @@ def create_app():
             f"user={db_summary['user']}",
             f"database={db_summary['database']}",
             f"password_set={db_summary['password_set']}",
+            f"cors_origins={cors_origins}",
         )
         init_db()
     except Exception as exc:
