@@ -1,0 +1,7 @@
+flask==3.1.0
+flask-cors==5.0.0
+mysql-connector-python==9.1.0
+python-dotenv==1.0.1
+gunicorn==23.0.0
+gspread==6.1.4
+oauth2client==4.1.3

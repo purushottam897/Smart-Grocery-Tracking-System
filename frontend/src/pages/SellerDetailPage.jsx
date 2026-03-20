@@ -1,0 +1,102 @@
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+import api from "../api";
+import EntryForm from "../components/EntryForm";
+import EntryList from "../components/EntryList";
+
+function SellerDetailPage() {
+  const { sellerId } = useParams();
+  const { t } = useTranslation();
+  const [seller, setSeller] = useState(null);
+  const [entries, setEntries] = useState([]);
+  const [lastEntry, setLastEntry] = useState(null);
+  const [dailyTotal, setDailyTotal] = useState(0);
+  const [message, setMessage] = useState("");
+
+  const fetchSellerData = async () => {
+    const [sellerResponse, entriesResponse] = await Promise.all([
+      api.get(`/sellers/${sellerId}`),
+      api.get(`/entries/${sellerId}`)
+    ]);
+
+    setSeller(sellerResponse.data);
+    setEntries(entriesResponse.data.entries || []);
+    setLastEntry(entriesResponse.data.last_entry || null);
+    setDailyTotal(entriesResponse.data.today_total_kg || 0);
+  };
+
+  useEffect(() => {
+    fetchSellerData();
+  }, [sellerId]);
+
+  const handleSubmitEntry = async (payload) => {
+    await api.post("/add-entry", {
+      seller_id: Number(sellerId),
+      bags: Number(payload.bags),
+      weight_per_bag: Number(payload.weight_per_bag)
+    });
+    setMessage(t("messages.entrySaved"));
+    fetchSellerData();
+  };
+
+  const handleRepeatLastEntry = async () => {
+    if (!lastEntry) {
+      return;
+    }
+    await api.post("/add-entry", {
+      seller_id: Number(sellerId),
+      bags: Number(lastEntry.bags),
+      weight_per_bag: Number(lastEntry.weight_per_bag)
+    });
+    setMessage(t("messages.entryRepeated"));
+    fetchSellerData();
+  };
+
+  if (!seller) {
+    return <p>{t("actions.loading")}</p>;
+  }
+
+  return (
+    <div className="page-grid">
+      <Link className="back-link" to="/">
+        ← {t("nav.sellers")}
+      </Link>
+
+      {message ? <p className="success-message">{message}</p> : null}
+
+      <section className="card seller-detail-card">
+        <div>
+          <p className="eyebrow">{t("pages.sellerDetailTitle")}</p>
+          <h2>{seller.person_name}</h2>
+        </div>
+        <div className="detail-grid">
+          <div>
+            <span>{t("labels.product")}</span>
+            <strong>{seller.product}</strong>
+          </div>
+          <div>
+            <span>{t("labels.village")}</span>
+            <strong>{seller.village}</strong>
+          </div>
+          <div>
+            <span>{t("entry.dailyTotal")}</span>
+            <strong>{Number(dailyTotal).toFixed(2)} kg</strong>
+          </div>
+        </div>
+      </section>
+
+      <div className="split-layout">
+        <EntryForm
+          lastEntry={lastEntry}
+          onSubmitEntry={handleSubmitEntry}
+          onRepeatLastEntry={handleRepeatLastEntry}
+        />
+        <EntryList entries={entries} dailyTotal={dailyTotal} />
+      </div>
+    </div>
+  );
+}
+
+export default SellerDetailPage;

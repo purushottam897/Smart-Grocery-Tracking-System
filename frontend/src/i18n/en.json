@@ -1,0 +1,74 @@
+{
+  "app": {
+    "title": "Smart Grocery Tracking System",
+    "tagline": "Fast purchase tracking for daily collection"
+  },
+  "nav": {
+    "sellers": "Farmers",
+    "dashboard": "Dashboard"
+  },
+  "actions": {
+    "addSeller": "Add Farmer",
+    "addEntry": "Add Entry",
+    "repeatLastEntry": "Repeat Last Entry",
+    "search": "Search",
+    "save": "Save",
+    "loading": "Loading...",
+    "refresh": "Refresh"
+  },
+  "labels": {
+    "personName": "Person Name",
+    "product": "Product Name",
+    "village": "Village",
+    "bags": "Bags",
+    "weightPerBag": "Weight per Bag",
+    "totalKg": "Total kg",
+    "seller": "Farmer",
+    "language": "Language",
+    "period": "Period",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month"
+  },
+  "pages": {
+    "sellerListTitle": "Farmer Profiles",
+    "sellerListSubtitle": "Create reusable farmer profiles to avoid repeated typing.",
+    "sellerDetailTitle": "Farmer Detail",
+    "entriesTitle": "Entries",
+    "dashboardTitle": "Purchase Dashboard",
+    "dashboardSubtitle": "Monitor totals, villages, and highest-volume farmer."
+  },
+  "placeholders": {
+    "searchSeller": "Search by farmer, product, or village",
+    "personName": "Enter person name",
+    "product": "Enter product name",
+    "village": "Enter village name",
+    "bags": "Number of bags",
+    "weightPerBag": "Kg per bag"
+  },
+  "messages": {
+    "noSellers": "No farmers yet. Add one to get started.",
+    "noEntries": "No entries available for this farmer yet.",
+    "sellerSaved": "Farmer added successfully.",
+    "entrySaved": "Entry added successfully.",
+    "entryRepeated": "Last entry repeated successfully.",
+    "dashboardEmpty": "No purchase data for this period.",
+    "topSellerNone": "No top farmer yet"
+  },
+  "voice": {
+    "start": "Mic",
+    "listening": "Listening...",
+    "buttonLabel": "Start voice input",
+    "supportedHint": "Supports English and Telugu speech input in supported browsers."
+  },
+  "dashboard": {
+    "totalPurchasedToday": "Total Purchased",
+    "villageTotals": "Village Totals",
+    "topSeller": "Top Farmer",
+    "chartTitle": "Top Farmers by Total kg"
+  },
+  "entry": {
+    "calculation": "{{bags}} x {{weight}} = {{total}} kg",
+    "dailyTotal": "Daily Total"
+  }
+}

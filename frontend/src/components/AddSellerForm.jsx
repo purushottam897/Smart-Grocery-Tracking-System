@@ -1,0 +1,87 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import VoiceInputButton from "./VoiceInputButton";
+
+const initialState = {
+  person_name: "",
+  product: "",
+  village: ""
+};
+
+function AddSellerForm({ onSellerAdded }) {
+  const { t } = useTranslation();
+  const [formData, setFormData] = useState(initialState);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleVoiceFill = (fieldName) => (transcript) => {
+    setFormData((current) => ({ ...current, [fieldName]: transcript }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    await onSellerAdded(formData);
+    setFormData(initialState);
+    setSubmitting(false);
+  };
+
+  return (
+    <form className="card form-grid" onSubmit={handleSubmit}>
+      <h2>{t("actions.addSeller")}</h2>
+
+      <label>
+        <span>{t("labels.personName")}</span>
+        <div className="voice-input-row">
+          <input
+            required
+            name="person_name"
+            value={formData.person_name}
+            onChange={handleChange}
+            placeholder={t("placeholders.personName")}
+          />
+          <VoiceInputButton onTranscript={handleVoiceFill("person_name")} />
+        </div>
+      </label>
+
+      <label>
+        <span>{t("labels.product")}</span>
+        <div className="voice-input-row">
+          <input
+            required
+            name="product"
+            value={formData.product}
+            onChange={handleChange}
+            placeholder={t("placeholders.product")}
+          />
+          <VoiceInputButton onTranscript={handleVoiceFill("product")} />
+        </div>
+      </label>
+
+      <label>
+        <span>{t("labels.village")}</span>
+        <div className="voice-input-row">
+          <input
+            required
+            name="village"
+            value={formData.village}
+            onChange={handleChange}
+            placeholder={t("placeholders.village")}
+          />
+          <VoiceInputButton onTranscript={handleVoiceFill("village")} />
+        </div>
+      </label>
+
+      <button type="submit" className="primary-button" disabled={submitting}>
+        {submitting ? t("actions.loading") : t("actions.addSeller")}
+      </button>
+    </form>
+  );
+}
+
+export default AddSellerForm;
