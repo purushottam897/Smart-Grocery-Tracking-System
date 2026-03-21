@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import AddSellerForm from "../components/AddSellerForm";
-import VoiceInputButton from "../components/VoiceInputButton";
 import api from "../api";
+
+const PREVIEW_COUNT = 6;
 
 function SellerListPage() {
   const { t } = useTranslation();
@@ -51,11 +52,6 @@ function SellerListPage() {
     }
   };
 
-  const handleSearch = async (event) => {
-    const value = event.target.value;
-    setSearch(value);
-  };
-
   return (
     <div className="page-grid">
       <section className="page-header">
@@ -71,22 +67,16 @@ function SellerListPage() {
 
         <section className="card">
           <div className="title-row">
-            <h2>{t("nav.sellers")}</h2>
+            <div>
+              <h2>{t("pages.farmerPreviewTitle")}</h2>
+              <p className="section-copy">{t("pages.farmerPreviewSubtitle")}</p>
+            </div>
+            <Link className="secondary-button inline-button" to="/farmers">
+              {t("actions.viewAllFarmers")}
+            </Link>
           </div>
 
-          <input
-            className="search-input"
-            value={search}
-            onChange={handleSearch}
-            placeholder={t("placeholders.searchSeller")}
-          />
-          <div className="search-voice-row">
-            <VoiceInputButton
-              onTranscript={(transcript) => {
-                setSearch(transcript);
-              }}
-            />
-          </div>
+          <p className="helper-text">{t("voice.teluguHint")}</p>
 
           {loading ? (
             <p>{t("actions.loading")}</p>
@@ -94,7 +84,7 @@ function SellerListPage() {
             <p className="empty-state">{t("messages.noSellers")}</p>
           ) : (
             <div className="seller-list">
-              {sellers.map((seller) => (
+              {sellers.slice(0, PREVIEW_COUNT).map((seller) => (
                 <Link key={seller.id} to={`/seller/${seller.id}`} className="seller-card">
                   <div>
                     <h3>{seller.person_name}</h3>
@@ -109,6 +99,12 @@ function SellerListPage() {
               ))}
             </div>
           )}
+
+          {!loading && sellers.length > PREVIEW_COUNT ? (
+            <Link className="text-link" to="/farmers">
+              {t("messages.moreFarmers", { count: sellers.length - PREVIEW_COUNT })}
+            </Link>
+          ) : null}
         </section>
       </div>
     </div>

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-function VoiceInputButton({ onTranscript, className = "" }) {
+function VoiceInputButton({ onTranscript, className = "", lang }) {
   const { i18n, t } = useTranslation();
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(false);
+  const recognitionLang = lang || (i18n.language === "te" ? "te-IN" : "en-IN");
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -16,7 +17,7 @@ function VoiceInputButton({ onTranscript, className = "" }) {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = i18n.language === "te" ? "te-IN" : "en-IN";
+    recognition.lang = recognitionLang;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
@@ -45,7 +46,7 @@ function VoiceInputButton({ onTranscript, className = "" }) {
     return () => {
       recognition.stop();
     };
-  }, [i18n.language, onTranscript]);
+  }, [onTranscript, recognitionLang]);
 
   const handleClick = () => {
     if (!recognitionRef.current) {
@@ -57,7 +58,7 @@ function VoiceInputButton({ onTranscript, className = "" }) {
       return;
     }
 
-    recognitionRef.current.lang = i18n.language === "te" ? "te-IN" : "en-IN";
+    recognitionRef.current.lang = recognitionLang;
     recognitionRef.current.start();
   };
 

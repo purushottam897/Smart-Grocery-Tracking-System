@@ -4,11 +4,13 @@
     "tagline": "Fast purchase tracking for daily collection"
   },
   "nav": {
+    "profile": "Profile",
     "sellers": "Farmers",
     "dashboard": "Dashboard"
   },
   "actions": {
     "addSeller": "Add Farmer",
+    "viewAllFarmers": "View All Farmers",
     "addEntry": "Add Entry",
     "repeatLastEntry": "Repeat Last Entry",
     "search": "Search",
@@ -33,6 +35,10 @@
   "pages": {
     "sellerListTitle": "Farmer Profiles",
     "sellerListSubtitle": "Create reusable farmer profiles to avoid repeated typing.",
+    "farmerPreviewTitle": "Recent Farmers",
+    "farmerPreviewSubtitle": "Keep the profile page short and open the full farmer directory when needed.",
+    "farmerDirectoryTitle": "Farmer Directory",
+    "farmerDirectorySubtitle": "Browse farmers page by page instead of loading the whole list in one screen.",
     "sellerDetailTitle": "Farmer Detail",
     "entriesTitle": "Entries",
     "dashboardTitle": "Purchase Dashboard",
@@ -48,6 +54,8 @@
   },
   "messages": {
     "noSellers": "No farmers yet. Add one to get started.",
+    "moreFarmers_one": "View 1 more farmer in the full directory.",
+    "moreFarmers_other": "View {{count}} more farmers in the full directory.",
     "noEntries": "No entries available for this farmer yet.",
     "sellerSaved": "Farmer added successfully.",
     "entrySaved": "Entry added successfully.",
@@ -59,7 +67,13 @@
     "start": "Mic",
     "listening": "Listening...",
     "buttonLabel": "Start voice input",
-    "supportedHint": "Supports English and Telugu speech input in supported browsers."
+    "supportedHint": "Supports English and Telugu speech input in supported browsers.",
+    "teluguHint": "Mic input for farmer name and village uses Telugu speech recognition."
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "pageStatus": "Page {{page}} of {{total}}"
   },
   "dashboard": {
     "totalPurchasedToday": "Total Purchased",

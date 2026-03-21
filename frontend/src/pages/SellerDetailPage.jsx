@@ -95,7 +95,7 @@ function SellerDetailPage() {
 
   return (
     <div className="page-grid">
-      <Link className="back-link" to="/">
+      <Link className="back-link" to="/farmers">
         ← {t("nav.sellers")}
       </Link>
 

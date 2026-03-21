@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import LanguageToggle from "./components/LanguageToggle";
 import DashboardPage from "./pages/DashboardPage";
 import SellerDetailPage from "./pages/SellerDetailPage";
+import FarmerDirectoryPage from "./pages/FarmerDirectoryPage";
 import SellerListPage from "./pages/SellerListPage";
 
 function App() {
@@ -21,6 +22,9 @@ function App() {
 
       <nav className="nav-tabs">
         <NavLink to="/" end className={({ isActive }) => (isActive ? "active" : "")}>
+          {t("nav.profile")}
+        </NavLink>
+        <NavLink to="/farmers" className={({ isActive }) => (isActive ? "active" : "")}>
           {t("nav.sellers")}
         </NavLink>
         <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
@@ -31,6 +35,7 @@ function App() {
       <main className="page-shell">
         <Routes>
           <Route path="/" element={<SellerListPage />} />
+          <Route path="/farmers" element={<FarmerDirectoryPage />} />
           <Route path="/seller/:sellerId" element={<SellerDetailPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>

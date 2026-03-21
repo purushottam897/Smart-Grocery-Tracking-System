@@ -49,7 +49,7 @@ function AddSellerForm({ onSellerAdded }) {
             onChange={handleChange}
             placeholder={t("placeholders.personName")}
           />
-          <VoiceInputButton onTranscript={handleVoiceFill("person_name")} />
+          <VoiceInputButton onTranscript={handleVoiceFill("person_name")} lang="te-IN" />
         </div>
       </label>
 
@@ -97,7 +97,7 @@ function AddSellerForm({ onSellerAdded }) {
             onChange={handleChange}
             placeholder={t("placeholders.village")}
           />
-          <VoiceInputButton onTranscript={handleVoiceFill("village")} />
+          <VoiceInputButton onTranscript={handleVoiceFill("village")} lang="te-IN" />
         </div>
       </label>
 
