@@ -2,7 +2,7 @@ from config.db import get_connection
 
 
 def create_entry(seller_id, bags, weight_per_bag):
-    total_kg = round(float(bags) * float(weight_per_bag), 2)
+    total_kg = round(float(weight_per_bag), 2)
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
     try:

@@ -3,6 +3,10 @@ from urllib.parse import urlparse
 
 import mysql.connector
 from mysql.connector import Error
+from mysql.connector.pooling import MySQLConnectionPool
+
+
+_connection_pools = {}
 
 
 def _get_env(*keys, default=None):
@@ -106,13 +110,46 @@ def get_db_debug_summary():
 
 
 def get_connection():
-    return mysql.connector.connect(**validate_db_config(get_db_config()))
+    config = validate_db_config(get_db_config())
+    pool_key = (
+        config["host"],
+        config["port"],
+        config["user"],
+        config["database"],
+    )
+    pool = _connection_pools.get(pool_key)
+
+    if pool is None:
+        pool = MySQLConnectionPool(
+            pool_name=f"pool_{len(_connection_pools)}",
+            pool_size=int(os.getenv("DB_POOL_SIZE", "5")),
+            **config,
+        )
+        _connection_pools[pool_key] = pool
+
+    return pool.get_connection()
 
 
 def get_server_connection():
     config = validate_db_config(get_db_config()).copy()
     config.pop("database", None)
-    return mysql.connector.connect(**config)
+    pool_key = (
+        config["host"],
+        config["port"],
+        config["user"],
+        None,
+    )
+    pool = _connection_pools.get(pool_key)
+
+    if pool is None:
+        pool = MySQLConnectionPool(
+            pool_name=f"pool_{len(_connection_pools)}",
+            pool_size=int(os.getenv("DB_POOL_SIZE", "3")),
+            **config,
+        )
+        _connection_pools[pool_key] = pool
+
+    return pool.get_connection()
 
 
 def ensure_database_exists():
@@ -182,6 +219,16 @@ def create_tables(connection):
             )
             """
         )
+        for index_sql in (
+            "CREATE INDEX idx_entries_seller_date ON entries (seller_id, date)",
+            "CREATE INDEX idx_entries_date ON entries (date)",
+            "CREATE INDEX idx_sellers_person_name ON sellers (person_name)",
+        ):
+            try:
+                cursor.execute(index_sql)
+            except Error as exc:
+                if exc.errno != mysql.connector.errorcode.ER_DUP_KEYNAME:
+                    raise
         connection.commit()
         print("Tables created")
     except Error as exc:

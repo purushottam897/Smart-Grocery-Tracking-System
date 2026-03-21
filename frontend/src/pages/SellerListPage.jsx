@@ -32,8 +32,12 @@ function SellerListPage() {
   };
 
   useEffect(() => {
-    fetchSellers();
-  }, []);
+    const timeoutId = window.setTimeout(() => {
+      fetchSellers(search);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [search]);
 
   const handleSellerAdded = async (payload) => {
     try {
@@ -50,7 +54,6 @@ function SellerListPage() {
   const handleSearch = async (event) => {
     const value = event.target.value;
     setSearch(value);
-    fetchSellers(value);
   };
 
   return (
@@ -81,7 +84,6 @@ function SellerListPage() {
             <VoiceInputButton
               onTranscript={(transcript) => {
                 setSearch(transcript);
-                fetchSellers(transcript);
               }}
             />
           </div>

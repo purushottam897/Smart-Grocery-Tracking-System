@@ -1,5 +1,6 @@
 import os
 import smtplib
+import threading
 from email.message import EmailMessage
 from pathlib import Path
 
@@ -101,7 +102,24 @@ def send_email_notification(data):
         )
     )
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
         server.starttls()
         server.login(sender_email, sender_password)
         server.send_message(message)
+
+
+def _run_backup_tasks(data):
+    try:
+        save_to_google_sheet(data)
+    except Exception as exc:
+        print(f"Google Sheets backup failed: {exc}")
+
+    try:
+        send_email_notification(data)
+    except Exception as exc:
+        print(f"Gmail notification skipped or failed: {exc}")
+
+
+def queue_backup_tasks(data):
+    thread = threading.Thread(target=_run_backup_tasks, args=(data,), daemon=True)
+    thread.start()

@@ -20,8 +20,8 @@
     "personName": "Person Name",
     "product": "Product Name",
     "village": "Village",
-    "bags": "Bags",
-    "weightPerBag": "Weight per Bag",
+    "bags": "Bag Serial Number",
+    "weightPerBag": "Kg",
     "totalKg": "Total kg",
     "seller": "Farmer",
     "language": "Language",
@@ -43,8 +43,8 @@
     "personName": "Enter person name",
     "product": "Enter product name",
     "village": "Enter village name",
-    "bags": "Number of bags",
-    "weightPerBag": "Kg per bag"
+    "bags": "Enter bag serial number",
+    "weightPerBag": "Enter kg"
   },
   "messages": {
     "noSellers": "No farmers yet. Add one to get started.",
@@ -68,7 +68,7 @@
     "chartTitle": "Top Farmers by Total kg"
   },
   "entry": {
-    "calculation": "{{bags}} x {{weight}} = {{total}} kg",
+    "calculation": "Bag #{{bags}} • {{total}} kg",
     "dailyTotal": "Daily Total"
   }
 }

@@ -9,7 +9,7 @@ const initialEntry = {
 function EntryForm({ lastEntry, onSubmitEntry, onRepeatLastEntry }) {
   const { t } = useTranslation();
   const [formData, setFormData] = useState(initialEntry);
-  const total = Number(formData.bags || 0) * Number(formData.weight_per_bag || 0);
+  const total = Number(formData.weight_per_bag || 0);
 
   useEffect(() => {
     if (lastEntry) {

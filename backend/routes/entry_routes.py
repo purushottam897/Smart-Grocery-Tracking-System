@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from models.entry_model import create_entry, get_entries_by_seller_id, get_last_entry_for_seller
 from models.seller_model import get_seller_by_id
-from services.backup import save_to_google_sheet, send_email_notification
+from services.backup import queue_backup_tasks
 
 entry_bp = Blueprint("entry_bp", __name__)
 
@@ -25,10 +25,10 @@ def add_entry():
         bags = int(bags)
         weight_per_bag = float(weight_per_bag)
     except (TypeError, ValueError):
-        return jsonify({"error": "bags must be an integer and weight_per_bag must be a number"}), 400
+        return jsonify({"error": "bag serial number must be an integer and kg must be a number"}), 400
 
     if bags <= 0 or weight_per_bag <= 0:
-        return jsonify({"error": "bags and weight_per_bag must be greater than zero"}), 400
+        return jsonify({"error": "bag serial number and kg must be greater than zero"}), 400
 
     entry = create_entry(seller_id, bags, weight_per_bag)
     backup_data = {
@@ -40,16 +40,7 @@ def add_entry():
         "total_kg": float(entry["total_kg"]),
         "date": str(entry["date"]),
     }
-
-    try:
-        save_to_google_sheet(backup_data)
-    except Exception as exc:
-        print(f"Google Sheets backup failed: {exc}")
-
-    try:
-        send_email_notification(backup_data)
-    except Exception as exc:
-        print(f"Gmail notification skipped or failed: {exc}")
+    queue_backup_tasks(backup_data)
 
     return jsonify(entry), 201
 
