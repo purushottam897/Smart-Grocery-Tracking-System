@@ -54,6 +54,10 @@ python app.py
 
 The API will run on `http://127.0.0.1:8082` locally and is deployed at `https://smart-grocery-tracking-system.onrender.com`.
 
+For cloud MySQL providers, you can either set the individual `DB_*` variables or provide a full connection string in `DATABASE_URL`, `MYSQL_PUBLIC_URL`, or `MYSQL_URL`.
+
+If you are using Railway, double-check the hostname carefully. A value such as `*.rlwy.not` is invalid and should usually be `*.rlwy.net`.
+
 ### Google Sheets Backup Setup
 
 1. Enable both the Google Sheets API and Google Drive API in your Google Cloud project.

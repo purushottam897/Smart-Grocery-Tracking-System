@@ -9,7 +9,7 @@ def _get_env(*keys, default=None):
     for key in keys:
         value = os.getenv(key)
         if value not in (None, ""):
-            return value
+            return str(value).strip().strip("\"'")
 
     return default
 
@@ -58,12 +58,29 @@ def get_db_config():
     }
 
 
+def _get_host_hint(host):
+    normalized_host = (host or "").strip().lower()
+    if normalized_host.endswith("rlwy.not"):
+        return f"Invalid database host '{host}'. Did you mean '{host[:-3]}net'?"
+
+    if " " in normalized_host:
+        return f"Invalid database host '{host}'. Remove any spaces from the hostname."
+
+    return None
+
+
 def validate_db_config(config):
     missing = [key for key in ("host", "user", "database") if not config.get(key)]
     if missing:
         raise RuntimeError(
             "Missing required database environment variables: "
             + ", ".join(f"DB_{key.upper()}" for key in missing)
+        )
+
+    host_hint = _get_host_hint(config["host"])
+    if host_hint:
+        raise RuntimeError(
+            f"{host_hint} This app reads DB_HOST/MYSQL_HOST or DATABASE_URL/MYSQL_PUBLIC_URL/MYSQL_URL."
         )
 
     return {
